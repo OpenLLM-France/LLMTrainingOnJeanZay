@@ -1,3 +1,9 @@
+## Deepspeed
+
+Number of compute-days to train on 100b tokens as a function of the number of GPUs:
+
+![](imgs/gpu.png)
+
 ## Raw speed results
 
 ### On Jean Zay
