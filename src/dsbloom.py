@@ -7,12 +7,10 @@ import deepspeed
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, TrainingArguments
 from datasets import load_from_disk
 from tqdm import tqdm
-from deepspeed.sequence.layer import DistributedAttention
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
 GRADACC = 64
 CTXLEN = 2048
-CTXLEN = 1024
 
 print("deepspeedversion",deepspeed.__version__)
 
@@ -80,7 +78,7 @@ def print_rank_0(*args, **kwargs):
     if idr_torch.rank == 0:
         print(*args, **kwargs)
 
-def train_loop(model, tokenizer, train_dataloader, criterion, optimizer):
+def train_loop(model, tokenizer, train_dataloader, optimizer):
     model.train()
     # tqdm for a nice progress bar, allow only on rank 0 for cleaner output
     loop = tqdm(train_dataloader, disable=(idr_torch.rank != 0))
@@ -160,10 +158,9 @@ def main(args):
     model = AutoModelForCausalLM.from_pretrained(
         model_path, torch_dtype=torch.bfloat16
     )
-    # model.gradient_checkpointing_enable()
+    model.gradient_checkpointing_enable()
 
     # Initialize Optimizer and Criterion
-    criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
    
     # Prepare model, dataset... for distributed training with deepspeed
@@ -174,7 +171,7 @@ def main(args):
 
     # 1 epoch
     start_epoch = time()
-    model = train_loop(model, tokenizer, train_dataloader, criterion, optimizer)
+    model = train_loop(model, tokenizer, train_dataloader, optimizer)
     print_rank_0(
         f"Duration: {(time() - start_epoch):.3f}s "
     )
