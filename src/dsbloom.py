@@ -10,7 +10,7 @@ from tqdm import tqdm
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
 GRADACC = 256
-CTXLEN = 1024
+CTXLEN = 2048
 
 # Initialize Distributed Training
 deepspeed.init_distributed(
@@ -139,6 +139,7 @@ def main(args):
     model = AutoModelForCausalLM.from_pretrained(
         model_path, torch_dtype=torch.bfloat16
     )
+    model.gradient_checkpointing_enable()
 
     # Initialize Optimizer and Criterion
     criterion = torch.nn.CrossEntropyLoss()
