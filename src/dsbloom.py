@@ -9,15 +9,16 @@ from datasets import load_from_disk
 from tqdm import tqdm
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
-GRADACC = 256
+GRADACC = 64
 CTXLEN = 2048
-CTXLEN = 512
+CTXLEN = 1024
 
 # Initialize Distributed Training
 deepspeed.init_distributed(
         dist_backend="nccl",
         init_method="env://",
 )
+print("process",idr_torch.local_rank)
 torch.cuda.set_device(idr_torch.local_rank)
 DEVICE = torch.device("cuda")
 
