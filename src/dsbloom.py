@@ -11,8 +11,8 @@ from deepspeed.sequence.layer import DistributedAttention
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
 GRADACC = 64
-CTXLEN = 1024
 CTXLEN = 2048
+CTXLEN = 1024
 
 print("deepspeedversion",deepspeed.__version__)
 
@@ -47,16 +47,32 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-# get the deepspeed configuration
+# get the deepspeed configuration see https://www.deepspeed.ai/docs/config-json/#batch-size-related-parameters
 def get_ds_config(args):
     ds_config = {
-        "train_micro_batch_size_per_gpu": args.batch_size,
-        "gradient_accumulation_steps": GRADACC,
-        "bf16": {"enabled": True},
-        "zero_optimization": {
-            "stage": args.stage,
-        },
-    }
+            "train_micro_batch_size_per_gpu": args.batch_size,
+            "gradient_accumulation_steps": GRADACC,
+            "bf16": {"enabled": True},
+            "zero_optimization": {
+                "stage": args.stage,
+                },
+            "flops_profiler": {
+                "enabled": false,
+                "profile_step": 1,
+                "module_depth": -1,
+                "top_modules": 1,
+                "detailed": true,
+                "output_file": null,
+                },
+            # "activation_checkpointing": {
+            #     "partition_activations": false,
+            #     "cpu_checkpointing": false,
+            #     "contiguous_memory_optimization": false,
+            #     "number_checkpoints": null,
+            #     "synchronize_checkpoint_boundary": false,
+            #     "profile": false
+            #     },
+            }
     return ds_config
 
 # print only on rank 0 for cleaner output
