@@ -32,6 +32,64 @@ torch.cuda.manual_seed(53)
 # Avoid tokenizers warning
 # os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
+# for DistributedAttention
+class LocAtt(torch.nn.Module):
+    def forward(self, query_layer, key_layer, value_layer, num_heads, head_dim, layer_past, use_cache, alibi, beta, inv_norm_factor, attention_mask, head_mask, attention_dropout, _merge_heads):
+        batch_size, q_length, _, _ = query_layer.shape
+        query_layer = query_layer.transpose(1, 2).reshape(batch_size * num_heads, q_length, head_dim)
+        key_layer = key_layer.permute(0, 2, 3, 1).reshape(batch_size * num_heads, head_dim, q_length)
+        value_layer = value_layer.transpose(1, 2).reshape(batch_size * num_heads, q_length, head_dim)
+        if layer_past is not None:
+            past_key, past_value = layer_past
+            key_layer = torch.cat((past_key, key_layer), dim=2)
+            value_layer = torch.cat((past_value, value_layer), dim=1)
+        _, _, kv_length = key_layer.shape
+        if use_cache is True:
+            present = (key_layer, value_layer)
+        else:
+            present = None
+        matmul_result = alibi.baddbmm(
+            batch1=query_layer,
+            batch2=key_layer,
+            beta=beta,
+            alpha=inv_norm_factor,
+        )
+        attention_scores = matmul_result.view(batch_size, num_heads, q_length, kv_length)
+        input_dtype = attention_scores.dtype
+        if input_dtype == torch.float16: attention_scores = attention_scores.to(torch.float)
+        attn_weights = torch.masked_fill(attention_scores, attention_mask, torch.finfo(attention_scores.dtype).min)
+        attention_probs = F.softmax(attn_weights, dim=-1, dtype=torch.float32).to(input_dtype)
+        attention_probs = attention_dropout(attention_probs)
+        if head_mask is not None: attention_probs = attention_probs * head_mask
+        attention_probs_reshaped = attention_probs.view(batch_size * num_heads, q_length, kv_length)
+        context_layer = torch.bmm(attention_probs_reshaped, value_layer)
+        context_layer = _merge_heads(context_layer)
+        return context_layer
+
+locatt = LocAtt()
+
+class DistAttBloom(transformers.models.bloom.modeling_bloom.BloomAttention):
+    def dattinit(self):
+        pass
+
+    def forward(self, hidden_states, residual, alibi, attention_mask, layer_past=None, head_mask=None, use_cache=False, output_attentions=False):
+        fused_qkv = self.query_key_value(hidden_states)  # [batch_size, seq_length, 3 x hidden_size]
+        # 3 x [batch_size, seq_length, num_heads, head_dim]
+        (query_layer, key_layer, value_layer) = self._split_heads(fused_qkv)
+        context_layer = locatt.forward(query_layer, key_layer, value_layer, )
+        if self.pretraining_tp > 1 and self.slow_but_exact:
+            slices = self.hidden_size / self.pretraining_tp
+            output_tensor = torch.zeros_like(context_layer)
+            for i in range(self.pretraining_tp):
+                output_tensor = output_tensor + F.linear(
+                    context_layer[:, :, int(i * slices) : int((i + 1) * slices)],
+                    self.dense.weight[:, int(i * slices) : int((i + 1) * slices)])
+        else: output_tensor = self.dense(context_layer)
+        output_tensor = dropout_add(output_tensor, residual, self.hidden_dropout, self.training)
+        outputs = (output_tensor, present)
+        if output_attentions: outputs += (attention_probs,)
+        return outputs
+
 
 def parse_args():
     import argparse
@@ -57,20 +115,20 @@ def get_ds_config(args):
                 "stage": args.stage,
                 },
             "flops_profiler": {
-                "enabled": false,
+                "enabled": True,
                 "profile_step": 1,
                 "module_depth": -1,
                 "top_modules": 1,
-                "detailed": true,
-                "output_file": null,
+                "detailed": True,
+                "output_file": None,
                 },
             # "activation_checkpointing": {
-            #     "partition_activations": false,
-            #     "cpu_checkpointing": false,
-            #     "contiguous_memory_optimization": false,
-            #     "number_checkpoints": null,
-            #     "synchronize_checkpoint_boundary": false,
-            #     "profile": false
+            #     "partition_activations": False,
+            #     "cpu_checkpointing": False,
+            #     "contiguous_memory_optimization": False,
+            #     "number_checkpoints": None,
+            #     "synchronize_checkpoint_boundary": False,
+            #     "profile": False
             #     },
             }
     return ds_config
