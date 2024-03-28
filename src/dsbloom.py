@@ -11,6 +11,7 @@ import idr_torch  # IDRIS library to make distribution on JZ easier
 
 GRADACC = 256
 CTXLEN = 2048
+CTXLEN = 512
 
 # Initialize Distributed Training
 deepspeed.init_distributed(
