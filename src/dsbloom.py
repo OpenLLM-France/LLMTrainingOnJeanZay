@@ -7,11 +7,12 @@ import deepspeed
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, TrainingArguments
 from datasets import load_from_disk
 from tqdm import tqdm
+from deepspeed.sequence.layer import DistributedAttention
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
 GRADACC = 64
-CTXLEN = 2048
 CTXLEN = 1024
+CTXLEN = 2048
 
 print("deepspeedversion",deepspeed.__version__)
 
@@ -143,7 +144,7 @@ def main(args):
     model = AutoModelForCausalLM.from_pretrained(
         model_path, torch_dtype=torch.bfloat16
     )
-    model.gradient_checkpointing_enable()
+    # model.gradient_checkpointing_enable()
 
     # Initialize Optimizer and Criterion
     criterion = torch.nn.CrossEntropyLoss()
