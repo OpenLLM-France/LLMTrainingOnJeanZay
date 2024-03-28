@@ -14,7 +14,7 @@
 export HOME=$WORK"/home/"
 
 # env with latest deepspeed, transformers, datasets
-# . $HOME/envs/ds/bin/activate
+. $HOME/envs/ds/bin/activate
 
 # to get idr_torch
 module load cpuarch/amd
@@ -23,6 +23,8 @@ module load pytorch-gpu/py3/2.2.0
 ## launch script on every node
 set -x
 
-# code execution
+echo "DATEDEBUT"
+date
+
 srun python dsbloom.py
 

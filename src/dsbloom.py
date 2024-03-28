@@ -13,6 +13,8 @@ GRADACC = 64
 CTXLEN = 2048
 CTXLEN = 1024
 
+print("deepspeedversion",deepspeed.__version__)
+
 # Initialize Distributed Training
 deepspeed.init_distributed(
         dist_backend="nccl",
