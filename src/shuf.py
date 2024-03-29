@@ -8,22 +8,20 @@ cursor.execute("""
         line TEXT
     );
 """)
-inutt = False
 n=0
+putt=[]
 with open("wikifr.toks","r") as fp:
     for line in fp:
-        if line[0]=='[' and line[1]==' ':
-            inutt = True
-            utt = [int(x) for x in line[1:].split(' ') if len(x)>0]
-        elif line[-2]==']' and inutt:
-            utt = utt + [int(x) for x in line[:-2].split(' ') if len(x)>0]
+        if line[0]=='Y':
+            utt = [int(x) for x in line[2:].split(' ') if len(x)>0]
             n+=len(utt)
-            sutt = ' '.join([str(x) for x in utt])
-            print("UTT",n,sutt)
-            cursor.execute("INSERT INTO lines (line) VALUES (\""+sutt+"\");")
-            connection.commit()
-        elif inutt:
-            utt = utt + [int(x) for x in line.split(' ') if len(x)>0]
+            print("NTOKS",n)
+            if len(utt)>0: putt += utt
+            while len(putt)>=2048:
+                sutt = ' '.join([str(x) for x in putt[:2048]])
+                cursor.execute("INSERT INTO lines (line) VALUES (\""+sutt+"\");")
+                connection.commit()
+                putt = putt[2048:]
 
 with open("shuffled.toks", "w") as fp:
   for line in cursor.execute("""
