@@ -4,9 +4,7 @@ import torch
 import torch.distributed as dist
 from torch.utils.data.distributed import DistributedSampler
 import deepspeed
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, TrainingArguments
-from datasets import load_from_disk
-from tqdm import tqdm
+from transformers import AutoModelForCausalLM, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
 GRADACC = 64
@@ -26,10 +24,6 @@ DEVICE = torch.device("cuda")
 # Set Seed for Reproducibility
 torch.manual_seed(53)
 torch.cuda.manual_seed(53)
-
-# Avoid tokenizers warning
-# os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
 
 def parse_args():
     import argparse
@@ -77,16 +71,13 @@ def print_rank_0(*args, **kwargs):
     if idr_torch.rank == 0:
         print(*args, **kwargs)
 
-def train_loop(model, tokenizer, train_dataloader, optimizer):
+def train_loop(model, train_dataloader, optimizer):
     model.train()
-    # tqdm for a nice progress bar, allow only on rank 0 for cleaner output
-    loop = tqdm(train_dataloader, disable=(idr_torch.rank != 0))
 
-    for i, data in enumerate(loop):
+    for i, data in enumerate(train_dataloader):
         optimizer.zero_grad()
 
-        inputs = {'input_ids' : data}
-        inputs = inputs.to(DEVICE)
+        inputs = {'input_ids' : data.to(DEVICE)}
         xx = inputs['input_ids']
         print("datainputVRAM",xx.shape, idr_torch.rank, torch.cuda.memory_allocated())
         inputs['labels'] = xx.clone()
@@ -96,10 +87,6 @@ def train_loop(model, tokenizer, train_dataloader, optimizer):
         model.backward(loss)
         model.step()
 
-        # print next to progress bar
-        loop.set_postfix(loss=loss.item())
-
-    loop.close()
     return model
 
 class MegatronDS(torch.utils.data.Dataset):
@@ -117,8 +104,9 @@ class MegatronDS(torch.utils.data.Dataset):
             del self.buf[0]
 
     def reset(self):
-        print("reset DS")
-        if self.f == None: self.f = open("shuffled.toks","r")
+        print("reset DS",idr_torch.rank)
+        if self.f != None: self.f.close()
+        self.f = open("shuffled.toks","r")
         self.buf = []
         self.bufdeb = 0
         self.buflen = 100
@@ -129,20 +117,13 @@ class MegatronDS(torch.utils.data.Dataset):
         return 328389
 
     def __getitem__(self, i):
-        if i>=self.bufdeb and i<self.bufdeb+self.buflen:
-            return self.buf[i-self.bufdeb]
-        elif i<self.bufdeb:
-            self.reset()
-            return self.__getitem__(i)
-        else:
-            while i>=self.bufdeb+self.buflen:
-                self.readLine()
-            return self.__getitem__(i)
+        print("getitem",idr_torch.rank,i)
+        if i>=self.bufdeb and i<self.bufdeb+self.buflen: return self.buf[i-self.bufdeb]
+        elif i<self.bufdeb: self.reset()
+        while i>=self.bufdeb+self.buflen: self.readLine()
+        return self.buf[i-self.bufdeb]
 
 def main(args):
-    # Initialize Datasets
-    # dataset = load_from_disk(args.data_path)
-
     dataset = MegatronDS()
 
     # Need sampler for Distributed Training
@@ -181,11 +162,6 @@ def main(args):
     # Next line enable smart loading (zero.init()) (necessary for very big models)
     _ = TrainingArguments(output_dir="./", deepspeed=ds_config)
     model_path = os.path.join(args.model_dir, args.model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    # Configure the tokenizer to ensure padding is done right
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token_id = 0
-    tokenizer.padding_side = 'left'
 
     model = AutoModelForCausalLM.from_pretrained(
         model_path, torch_dtype=torch.bfloat16
@@ -204,7 +180,7 @@ def main(args):
     # 1 epoch
     start_epoch = time()
     train_sampler.set_epoch(0)
-    model = train_loop(model, tokenizer, train_dataloader, optimizer)
+    model = train_loop(model, train_dataloader, optimizer)
     print_rank_0(
         f"Duration: {(time() - start_epoch):.3f}s "
     )
