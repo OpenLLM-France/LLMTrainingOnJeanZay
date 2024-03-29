@@ -10,6 +10,8 @@ import idr_torch  # IDRIS library to make distribution on JZ easier
 GRADACC = 64
 CTXLEN = 2048
 
+# TODO: init from scratch with max vocab from megatron
+
 print("deepspeedversion",deepspeed.__version__)
 
 # Initialize Distributed Training
