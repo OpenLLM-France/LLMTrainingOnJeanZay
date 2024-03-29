@@ -7,8 +7,7 @@ import deepspeed
 from transformers import AutoModelForCausalLM, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
-GRADACC = 64
-CTXLEN = 2048
+GRADACC = 1
 
 # TODO: init from scratch with max vocab from megatron
 
@@ -34,9 +33,9 @@ def parse_args():
     parser.add_argument('--model_dir', type=str, default='/gpfsdswork/dataset/HuggingFace_Models/')
     parser.add_argument('--model_name', type=str, default='bigscience/bloom-7b1')
     parser.add_argument('--epochs', type=int, default=1)
-    parser.add_argument('--stage', type=int, default=1)
+    parser.add_argument('--stage', type=int, default=3)
     parser.add_argument('--lr', type=float, default=1e-04)
-    parser.add_argument('--batch_size', type=int, default=2)
+    parser.add_argument('--batch_size', type=int, default=1)
     args = parser.parse_args()
     return args
 
@@ -81,13 +80,13 @@ def train_loop(model, train_dataloader, optimizer):
 
         inputs = {'input_ids' : data.to(DEVICE)}
         xx = inputs['input_ids']
-        print("datainputVRAM",xx.shape, idr_torch.rank, torch.cuda.memory_allocated())
         inputs['labels'] = xx.clone()
         out = model(**inputs)
         loss = out.loss
         print("LOSS",loss.item())
         model.backward(loss)
         model.step()
+        print("datainputVRAM",xx.shape, idr_torch.rank, torch.cuda.memory_allocated())
 
     return model
 
@@ -144,7 +143,7 @@ def main(args):
         batch_size=args.batch_size,
         num_workers=0,
         pin_memory=True,
-        prefetch_factor=2,
+        # prefetch_factor=2,
     )
 
     # test_sampler = DistributedSampler(
