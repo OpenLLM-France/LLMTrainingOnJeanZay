@@ -142,7 +142,7 @@ def main(args):
         dataset,
         sampler=train_sampler,
         batch_size=args.batch_size,
-        num_workers=4,
+        num_workers=0,
         pin_memory=True,
         prefetch_factor=2,
     )
