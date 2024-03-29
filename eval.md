@@ -40,6 +40,12 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
 - FSDP, bloom-7b, batchsize=2, context=1024, 2xMI150X: 1500 jours pour 100b tokens
 - FSDP, bloom-7b, batchsize=2, context=1024, 4xMI150X: crash OOM
 
+### With 2048-ctxt dataset from Megatron
+
+- Deepspeed stage 3, gradacc 1, act_chkpting, AdamW, bloom-7b, bs 1, 2xA100:  **600 jours pour 100b tokens**
+    - VRAM hyper-limite: warnings de GPU cache flushing
+- Deepspeed stage 3, gradacc 1, act_chkpting, AdamW, bloom-7b, bs 1, 16xA100:  **jours pour 100b tokens**
+
 ## Preliminary loss curves
 
 - FSDP: bonne convergence

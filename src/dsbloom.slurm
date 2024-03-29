@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=ds_bloom
-#SBATCH --gres=gpu:2
-#SBATCH --ntasks-per-node=2
-#SBATCH --nodes=1
+#SBATCH --gres=gpu:8
+#SBATCH --ntasks-per-node=8
+#SBATCH --nodes=2
 #SBATCH --hint=nomultithread
 #SBATCH --time=00:50:00
 #SBATCH --qos=qos_gpu-dev
