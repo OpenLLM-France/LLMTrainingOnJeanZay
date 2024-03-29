@@ -59,13 +59,13 @@ def get_ds_config(args):
                 "module_depth": -1,
                 "top_modules": 1,
                 "detailed": True,
-                "output_file": null,
+                "output_file": None,
                 },
             # "activation_checkpointing": {
             #     "partition_activations": False,
             #     "cpu_checkpointing": False,
             #     "contiguous_memory_optimization": False,
-            #     "number_checkpoints": null,
+            #     "number_checkpoints": None,
             #     "synchronize_checkpoint_boundary": False,
             #     "profile": False
             #     },
@@ -85,13 +85,8 @@ def train_loop(model, tokenizer, train_dataloader, optimizer):
     for i, data in enumerate(loop):
         optimizer.zero_grad()
 
-        inputs = tokenizer.batch_encode_plus(
-            data['text'],
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=CTXLEN,
-        ).to(DEVICE)
+        inputs = {'input_ids' : data}
+        inputs = inputs.to(DEVICE)
         xx = inputs['input_ids']
         print("datainputVRAM",xx.shape, idr_torch.rank, torch.cuda.memory_allocated())
         inputs['labels'] = xx.clone()
