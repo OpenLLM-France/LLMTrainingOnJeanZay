@@ -54,7 +54,7 @@ def get_ds_config(args):
                 "stage": args.stage,
                 },
             "flops_profiler": {
-                "enabled": false,
+                "enabled": False,
                 "profile_step": 1,
                 "module_depth": -1,
                 "top_modules": 1,
@@ -62,12 +62,12 @@ def get_ds_config(args):
                 "output_file": null,
                 },
             # "activation_checkpointing": {
-            #     "partition_activations": false,
-            #     "cpu_checkpointing": false,
-            #     "contiguous_memory_optimization": false,
+            #     "partition_activations": False,
+            #     "cpu_checkpointing": False,
+            #     "contiguous_memory_optimization": False,
             #     "number_checkpoints": null,
-            #     "synchronize_checkpoint_boundary": false,
-            #     "profile": false
+            #     "synchronize_checkpoint_boundary": False,
+            #     "profile": False
             #     },
             }
     return ds_config
@@ -107,20 +107,58 @@ def train_loop(model, tokenizer, train_dataloader, optimizer):
     loop.close()
     return model
 
+class MegatronDS(torch.utils.data.Dataset):
+    def __init__(self):
+        self.f = None
+        self.reset()
+
+    def readLine(self):
+        s=self.f.readline()
+        ss=s.split(" ")
+        toks = torch.LongTensor([int(x) for x in ss])
+        self.buf.append(toks)
+        while len(self.buf)>=self.buflen:
+            self.bufdeb += 1
+            del self.buf[0]
+
+    def reset(self):
+        print("reset DS")
+        if self.f == None: self.f = open("shuffled.toks","r")
+        self.buf = []
+        self.bufdeb = 0
+        self.buflen = 100
+        for i in range(self.buflen): self.readLine()
+
+    def __len__(self):
+        # TODO: generalize it to other data files...
+        return 328389
+
+    def __getitem__(self, i):
+        if i>=self.bufdeb and i<self.bufdeb+self.buflen:
+            return self.buf[i-self.bufdeb]
+        elif i<self.bufdeb:
+            self.reset()
+            return self.__getitem__(i)
+        else:
+            while i>=self.bufdeb+self.buflen:
+                self.readLine()
+            return self.__getitem__(i)
 
 def main(args):
     # Initialize Datasets
-    dataset = load_from_disk(args.data_path)
+    # dataset = load_from_disk(args.data_path)
+
+    dataset = MegatronDS()
 
     # Need sampler for Distributed Training
     train_sampler = DistributedSampler(
-        dataset['train'],
-        shuffle=True,
+        dataset,
+        shuffle=False,
         num_replicas=idr_torch.world_size,
         rank=idr_torch.rank
     )
     train_dataloader = torch.utils.data.DataLoader(
-        dataset['train'],
+        dataset,
         sampler=train_sampler,
         batch_size=args.batch_size,
         num_workers=4,
