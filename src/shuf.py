@@ -1,6 +1,8 @@
 import sqlite3
 import time
 
+# temps estime: il faut 4 jours pour shuffler 100b tokens sur un disk NVME
+
 temp_db = "/home/xtof/nvme/openllm/utts.sqlite"
 connection = sqlite3.connect(temp_db)
 cursor = connection.cursor()
