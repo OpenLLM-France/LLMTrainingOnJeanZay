@@ -33,6 +33,7 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
 - Deepspeed stage 1+ gradacc 256 + gradient checkpointing, AdamW, bloom-7b, bs=2, context=2048, 32xA100: **40 jours pour 100b tokens**
 - Deepspeed stage 1+ gradacc 256 + gradient checkpointing, AdamW, bloom-7b, bs=2, context=2048, 48xA100: **28 jours pour 100b tokens**
 - Deepspeed stage 1+ gradacc 64 + gradient checkpointing, AdamW, bloom-7b, bs=2, context=1024, 8xA100: 147 jours pour 100b tokens
+    - Le DeepSpeed profiler donne pour cette config 88 TFlops/gpu soit 91168 token/s
 
 ### On Adastra
 

@@ -34,7 +34,6 @@ torch.cuda.manual_seed(53)
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser()
-    # Check IDRIS documentation to see which datasets and models are available on DSDIR
     parser.add_argument('--data_path', type=str, default='/gpfsdswork/dataset/HuggingFace/wikipedia/fr')
     parser.add_argument('--model_dir', type=str, default='/gpfsdswork/dataset/HuggingFace_Models/')
     parser.add_argument('--model_name', type=str, default='bigscience/bloom-7b1')
@@ -171,6 +170,7 @@ def main(args):
 
     # 1 epoch
     start_epoch = time()
+    train_sampler.set_epoch(0)
     model = train_loop(model, tokenizer, train_dataloader, optimizer)
     print_rank_0(
         f"Duration: {(time() - start_epoch):.3f}s "

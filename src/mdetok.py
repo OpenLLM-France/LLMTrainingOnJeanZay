@@ -1,6 +1,8 @@
 from megatron.data import indexed_dataset
 import transformers
 
+# cf. https://huggingface.co/OpenLLM-France/Lucie-tokenizer-v2.4-space_prefix_all/tree/main
+
 tokenizer = transformers.AutoTokenizer.from_pretrained("/gpfswork/rech/knb/uyr14tk/home/lucietokenizer")
 
 # path = "/gpfsscratch/rech/qgz/commun/preprocessed_data/Lucie/lucie_tokens_2.4-space_prefix_all/Wikipedia--fr--025_text_document"
