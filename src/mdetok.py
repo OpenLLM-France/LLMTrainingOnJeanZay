@@ -9,7 +9,11 @@ fichs = ("/gpfsscratch/rech/qgz/commun/preprocessed_data/Lucie/lucie_tokens_2.4-
 for path in fichs:
     dataset = indexed_dataset.MMapIndexedDataset(path)
     for i, data in enumerate(dataset):
-        text = tokenizer.decode(data)
-        text = text.replace("\n", "\\n")
-        print(text)
+        if True:
+            s = ' '.join([str(x) for x in data])
+            print("Y "+s)
+        else:
+            text = tokenizer.decode(data)
+            text = text.replace("\n", "\\n")
+            print(text)
 
