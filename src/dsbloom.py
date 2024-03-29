@@ -58,7 +58,7 @@ def get_ds_config(args):
                 "profile_step": 1,
                 "module_depth": -1,
                 "top_modules": 1,
-                "detailed": true,
+                "detailed": True,
                 "output_file": null,
                 },
             # "activation_checkpointing": {
