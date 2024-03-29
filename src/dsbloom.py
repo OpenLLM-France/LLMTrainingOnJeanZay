@@ -99,7 +99,7 @@ class MegatronDS(torch.utils.data.Dataset):
         ss=s.split(" ")
         toks = torch.LongTensor([int(x) for x in ss])
         self.buf.append(toks)
-        while len(self.buf)>=self.buflen:
+        while len(self.buf)>self.buflen:
             self.bufdeb += 1
             del self.buf[0]
 
@@ -117,7 +117,7 @@ class MegatronDS(torch.utils.data.Dataset):
         return 328389
 
     def __getitem__(self, i):
-        print("getitem",idr_torch.rank,i)
+        print("getitem",idr_torch.rank,i,self.bufdeb)
         if i>=self.bufdeb and i<self.bufdeb+self.buflen: return self.buf[i-self.bufdeb]
         elif i<self.bufdeb: self.reset()
         while i>=self.bufdeb+self.buflen: self.readLine()
