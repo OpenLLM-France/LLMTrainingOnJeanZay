@@ -99,7 +99,10 @@ class MegatronDS(torch.utils.data.Dataset):
     def readLine(self):
         s=self.f.readline()
         ss=s.split(" ")
-        toks = torch.LongTensor([int(x) for x in ss])
+        if len(ss)!=2048:
+            print("ERRDATA",len(ss),s)
+            return
+        toks = torch.LongTensor([int(x) for x in ss if len(x.strip())>0])
         self.buf.append(toks)
         while len(self.buf)>self.buflen:
             self.bufdeb += 1
