@@ -10,10 +10,12 @@ import idr_torch  # IDRIS library to make distribution on JZ easier
 GRADACC = 16
 
 # TODO:
-# - [ ] new model from config with max vocab from megatron tokenizer
+# - [ ] new model from config with max vocab from megatron tokenizer (32000 tokens)
 # - [ ] save dataset
 # - [ ] init model weights
 # - [ ] add LR scheduler
+
+# avec DS3 et plus de nodes, le pb de cache-RAM "pytorch allocator cache flushes" n'existe plus, la VRAM est <30GB, je pourrai meme tenter de supprimer le grad checkpointing...
 
 print("deepspeedversion",deepspeed.__version__)
 
