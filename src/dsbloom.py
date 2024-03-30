@@ -7,9 +7,13 @@ import deepspeed
 from transformers import AutoModelForCausalLM, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
-GRADACC = 1
+GRADACC = 16
 
-# TODO: init from scratch with max vocab from megatron
+# TODO:
+# - [ ] new model from config with max vocab from megatron tokenizer
+# - [ ] save dataset
+# - [ ] init model weights
+# - [ ] add LR scheduler
 
 print("deepspeedversion",deepspeed.__version__)
 
