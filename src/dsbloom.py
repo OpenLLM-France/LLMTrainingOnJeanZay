@@ -13,7 +13,7 @@ GRADACC = 16
 # TODO:
 # - [ ] new model from config with max vocab from megatron tokenizer (32000 tokens)
 # - [ ] save dataset
-# - [ ] init model weights
+# - [ ] init model weights: A very low standard initialization sqrt(0.3333/NHIDDEN) - in 104B-en used sqrt(0.4/NHIDDEN) see https://github.com/bigscience-workshop/bigscience/blob/master/train/tr11-176B-ml/chronicles.md
 # - [ ] add LR scheduler
 
 # avec DS3 et plus de nodes, le pb de cache-RAM "pytorch allocator cache flushes" n'existe plus, la VRAM est <30GB, je pourrai meme tenter de supprimer le grad checkpointing...
@@ -173,7 +173,7 @@ def main(args):
     # Next line enable smart loading (zero.init()) (necessary for very big models)
     _ = TrainingArguments(output_dir="./", deepspeed=ds_config)
 
-    cfg = transformers.models.bloom.BloomConfig.from_pretrained('bloom7b')
+    cfg = transformers.models.bloom.BloomConfig.from_pretrained('/gpfswork/rech/knb/uyr14tk/home/openllmfr/bloom7b')
     model = AutoModelForCausalLM.from_config(cfg)
 
     # model_path = os.path.join(args.model_dir, args.model_name)
