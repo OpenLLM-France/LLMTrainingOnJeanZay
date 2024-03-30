@@ -24,7 +24,7 @@
   "skip_bias_add": true,
   "skip_bias_add_qkv": false,
   "slow_but_exact": false,
-  "torch_dtype": "float32",
+  "torch_dtype": "bfloat16",
   "transformers_version": "4.22.2",
   "unk_token_id": 0,
   "use_cache": true,

@@ -4,6 +4,7 @@ import torch
 import torch.distributed as dist
 from torch.utils.data.distributed import DistributedSampler
 import deepspeed
+import transformers
 from transformers import AutoModelForCausalLM, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
@@ -171,11 +172,14 @@ def main(args):
     ds_config = get_ds_config(args)
     # Next line enable smart loading (zero.init()) (necessary for very big models)
     _ = TrainingArguments(output_dir="./", deepspeed=ds_config)
-    model_path = os.path.join(args.model_dir, args.model_name)
 
-    model = AutoModelForCausalLM.from_pretrained(
-        model_path, torch_dtype=torch.bfloat16
-    )
+    cfg = transformers.models.bloom.BloomConfig.from_pretrained('bloom7b')
+    model = AutoModelForCausalLM.from_config(cfg)
+
+    # model_path = os.path.join(args.model_dir, args.model_name)
+    # model = AutoModelForCausalLM.from_pretrained(
+    #     model_path, torch_dtype=torch.bfloat16
+    # )
     # model.gradient_checkpointing_enable()
 
     # Initialize Optimizer and Criterion

@@ -46,7 +46,9 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
     - VRAM hyper-limite: warnings de GPU cache flushing
 - Deepspeed stage 3, gradacc 1, act_chkpting, AdamW, bloom-7b, bs 1, 16xA100:  **585 jours pour 100b tokens**
 - Deepspeed stage 3, gradacc 16, act_chkpting, AdamW, bloom-7b, bs 1, 16xA100:  **560 jours pour 100b tokens**
-- Deepspeed stage 3, gradacc 16, NO act_chkpting, AdamW, bloom-7b, bs 1, 32xA100:  **jours pour 100b tokens**
+- Deepspeed stage 3, gradacc 16, NO act_chkpting, AdamW, bloom-7b, bs 1, 32xA100:  **252 jours pour 100b tokens**
+- Deepspeed stage 2, gradacc 16, NO act_chkpting, AdamW, bloom-7b, bs 1, 32xA100:  **jours pour 100b tokens**
+    - plus lent, pourquoi ? 1) seqs 2048 ? 2) gradacc ? 3) bs ?
 
 ## Preliminary loss curves
 
