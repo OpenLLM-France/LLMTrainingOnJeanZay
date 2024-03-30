@@ -16,7 +16,7 @@ GRADACC = 16
 # - [ ] init model weights: A very low standard initialization sqrt(0.3333/NHIDDEN) - in 104B-en used sqrt(0.4/NHIDDEN) see https://github.com/bigscience-workshop/bigscience/blob/master/train/tr11-176B-ml/chronicles.md
 # - [ ] add LR scheduler
 
-# avec DS3 et plus de nodes, le pb de cache-RAM "pytorch allocator cache flushes" n'existe plus, la VRAM est <30GB, je pourrai meme tenter de supprimer le grad checkpointing...
+# avec DS3 et plus de nodes, le pb de cache-RAM "pytorch allocator cache flushes" n'existe plus, la VRAM est <30GB, je pourrai meme tenter de supprimer le grad checkpointing... ca marche.
 
 print("deepspeedversion",deepspeed.__version__)
 
