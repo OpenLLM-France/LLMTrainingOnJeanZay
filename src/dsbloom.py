@@ -176,7 +176,7 @@ def main(args):
     model = AutoModelForCausalLM.from_pretrained(
         model_path, torch_dtype=torch.bfloat16
     )
-    model.gradient_checkpointing_enable()
+    # model.gradient_checkpointing_enable()
 
     # Initialize Optimizer and Criterion
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
