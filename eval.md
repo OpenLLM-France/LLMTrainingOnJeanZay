@@ -47,10 +47,15 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
 - Deepspeed stage 3, gradacc 1, act_chkpting, AdamW, bloom-7b, bs 1, 16xA100:  **585 jours pour 100b tokens**
 - Deepspeed stage 3, gradacc 16, act_chkpting, AdamW, bloom-7b, bs 1, 16xA100:  **560 jours pour 100b tokens**
 - Deepspeed stage 3, gradacc 16, NO act_chkpting, AdamW, bloom-7b, bs 1, 32xA100:  **252 jours pour 100b tokens**
-- Deepspeed stage 2, gradacc 16, NO act_chkpting, AdamW, bloom-7b, bs 1, 32xA100:  **249 jours pour 100b tokens**
+- Deepspeed stage 3, gradacc 16, NO act_chkpting, AdamW, bloom-7b, bs 1, 32xA100:  **249 jours pour 100b tokens**
     - plus lent que avant, pourquoi ? 1) seqs 2048 ? 2) gradacc ? 3) bs ? 4) stage 2 ?
     - j'avais avant: Deepspeed stage 1+ gradacc 256 + gradient checkpointing, AdamW, bloom-7b, bs=2, context=2048, 32xA100: **40 jours pour 100b tokens**
     - VRAM a 60GB: pourrait augmenter bs
+- Deepspeed stage 3, gradacc 256, NO act_chkpting, AdamW, bloom-7b, bs 2, 32xA100:  **218 jours pour 100b tokens**
+    - DIFF: avant, on avait la VRAM=33GB, maintenant VRAM=5GB !! (a cause du Stage 3!)
+    - DIFF: avant, pas de warning, now, warning "UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it" ==> version de apex / deepspeed !!!
+    - DIFF: je suis en stage 3 en fait !!!!
+- Deepspeed stage 1, gradacc 256, NO act_chkpting, AdamW, bloom-7b, bs 2, 32xA100:  **jours pour 100b tokens**
 
 ## Preliminary loss curves
 

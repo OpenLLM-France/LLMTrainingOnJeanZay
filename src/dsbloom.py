@@ -10,6 +10,7 @@ import idr_torch  # IDRIS library to make distribution on JZ easier
 
 GRADACC = 16
 GRADACC = 256
+STAGE = 1
 
 # TODO:
 # - [X] new model from config with max vocab from megatron tokenizer (32000 tokens)
@@ -41,7 +42,7 @@ def parse_args():
     parser.add_argument('--model_dir', type=str, default='/gpfsdswork/dataset/HuggingFace_Models/')
     parser.add_argument('--model_name', type=str, default='bigscience/bloom-7b1')
     parser.add_argument('--epochs', type=int, default=1)
-    parser.add_argument('--stage', type=int, default=3)
+    parser.add_argument('--stage', type=int, default=STAGE)
     parser.add_argument('--lr', type=float, default=1e-04)
     parser.add_argument('--batch_size', type=int, default=2)
     args = parser.parse_args()
