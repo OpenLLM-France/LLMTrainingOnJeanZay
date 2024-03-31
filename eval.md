@@ -55,7 +55,7 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
     - DIFF: avant, on avait la VRAM=33GB, maintenant VRAM=5GB !! (a cause du Stage 3!)
     - DIFF: avant, pas de warning, now, warning "UserWarning: c10d::broadcast_: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it" ==> version de apex / deepspeed !!!
     - DIFF: je suis en stage 3 en fait !!!!
-- Deepspeed stage 1, gradacc 256, NO act_chkpting, AdamW, bloom-7b, bs 2, 32xA100:  **jours pour 100b tokens**
+- Deepspeed stage 1, gradacc 256, act_chkpting, AdamW, bloom-7b, bs 2, 32xA100:  **jours pour 100b tokens**
 
 ## Preliminary loss curves
 
