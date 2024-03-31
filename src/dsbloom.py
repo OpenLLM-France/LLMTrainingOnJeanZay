@@ -8,15 +8,16 @@ import transformers
 from transformers import AutoModelForCausalLM, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
-GRADACC = 16
 GRADACC = 256
+GRADACC = 16
 STAGE = 1
+LR = 1e-05
 
 # TODO:
 # - [X] new model from config with max vocab from megatron tokenizer (32000 tokens)
-# - [ ] save dataset
 # - [ ] init model weights: A very low standard initialization sqrt(0.3333/NHIDDEN) - in 104B-en used sqrt(0.4/NHIDDEN) see https://github.com/bigscience-workshop/bigscience/blob/master/train/tr11-176B-ml/chronicles.md
 # - [ ] add LR scheduler
+# - [ ] save dataset
 
 # avec DS3 et plus de nodes, le pb de cache-RAM "pytorch allocator cache flushes" n'existe plus, la VRAM est <30GB, je pourrai meme tenter de supprimer le grad checkpointing... ca marche.
 
@@ -43,7 +44,7 @@ def parse_args():
     parser.add_argument('--model_name', type=str, default='bigscience/bloom-7b1')
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--stage', type=int, default=STAGE)
-    parser.add_argument('--lr', type=float, default=1e-04)
+    parser.add_argument('--lr', type=float, default=LR)
     parser.add_argument('--batch_size', type=int, default=2)
     args = parser.parse_args()
     return args

@@ -2,10 +2,10 @@
 #SBATCH --job-name=ds_bloom
 #SBATCH --gres=gpu:8
 #SBATCH --ntasks-per-node=8
-#SBATCH --nodes=4
+#SBATCH --nodes=6
 #SBATCH --hint=nomultithread
 #SBATCH --time=00:50:00
-#SBATCH --qos=qos_gpu-dev
+# #SBATCH --qos=qos_gpu-dev
 #SBATCH --cpus-per-task=8
 #SBATCH --account=knb@a100
 #SBATCH -C a100
