@@ -57,7 +57,8 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
     - DIFF: je suis en stage 3 en fait !!!!
 - Deepspeed stage 1, gradacc 256, act_chkpting, AdamW, bloom-7b, bs 2, 32xA100:  **36 jours pour 100b tokens**
     - mais tres mauvaise convergence, both gradacc et LR sont mauvais...
-- Deepspeed stage 1, gradacc 16, act_chkpting, AdamW, bloom-7b, bs 2, 48xA100:  **jours pour 100b tokens**
+- Deepspeed stage 1, gradacc 16, act_chkpting, AdamW, bloom-7b, bs 2, 48xA100:  **34 jours pour 100b tokens**
+- Deepspeed stage 1, gradacc 16, act_chkpting, AdamW, bloom-7b, bs 2, 48xA100:  **34 jours pour 100b tokens**
 
 ## Preliminary loss curves
 

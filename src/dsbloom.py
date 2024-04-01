@@ -8,15 +8,13 @@ import transformers
 from transformers import AutoModelForCausalLM, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
-GRADACC = 256
-GRADACC = 16
 STAGE = 1
 LR = 1e-05
 
 # TODO:
 # - [X] new model from config with max vocab from megatron tokenizer (32000 tokens)
+# - [X] add LR scheduler (pass to deepspeed config)
 # - [ ] init model weights: A very low standard initialization sqrt(0.3333/NHIDDEN) - in 104B-en used sqrt(0.4/NHIDDEN) see https://github.com/bigscience-workshop/bigscience/blob/master/train/tr11-176B-ml/chronicles.md
-# - [ ] add LR scheduler
 # - [ ] save dataset
 
 # avec DS3 et plus de nodes, le pb de cache-RAM "pytorch allocator cache flushes" n'existe plus, la VRAM est <30GB, je pourrai meme tenter de supprimer le grad checkpointing... ca marche.
@@ -52,8 +50,6 @@ def parse_args():
 # get the deepspeed configuration see https://www.deepspeed.ai/docs/config-json/#batch-size-related-parameters
 def get_ds_config(args):
     ds_config = {
-            "train_micro_batch_size_per_gpu": args.batch_size,
-            "gradient_accumulation_steps": GRADACC,
             "bf16": {"enabled": True},
             "zero_optimization": {
                 "stage": args.stage,
@@ -66,6 +62,27 @@ def get_ds_config(args):
                 "detailed": True,
                 "output_file": None,
                 },
+            "optimizer": {
+                "type": "AdamW",
+                "params": {
+                    "lr": LR,
+                    "betas": "auto",
+                    "eps": 1e-08,
+                    "weight_decay": 0.1,
+                    }
+                },
+            "scheduler": {
+                "type": "WarmupCosineLR",
+                "params": {
+                    "total_num_steps": 250000000000,
+                    "warmup_num_steps": 1000
+                    }
+                },
+            "gradient_accumulation_steps": "auto",
+            "gradient_clipping": "auto",
+            "train_batch_size": "auto",
+            "train_micro_batch_size_per_gpu": "auto",
+            "wall_clock_breakdown": False,
             # "activation_checkpointing": {
             #     "partition_activations": False,
             #     "cpu_checkpointing": False,
@@ -82,13 +99,10 @@ def print_rank_0(*args, **kwargs):
     if idr_torch.rank == 0:
         print(*args, **kwargs)
 
-def train_loop(model, train_dataloader, optimizer):
-    model.train()
+def train_loop(model, train_dataloader):
 
     for i, data in enumerate(train_dataloader):
-        optimizer.zero_grad()
-
-        inputs = {'input_ids' : data.to(DEVICE)}
+        inputs = {'input_ids' : data.to(model.local_rank)}
         xx = inputs['input_ids']
         inputs['labels'] = xx.clone()
         out = model(**inputs)
@@ -183,21 +197,20 @@ def main(args):
     # model = AutoModelForCausalLM.from_pretrained(
     #     model_path, torch_dtype=torch.bfloat16
     # )
-    model.gradient_checkpointing_enable()
+    # model.gradient_checkpointing_enable()
 
     # Initialize Optimizer and Criterion
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
    
     # Prepare model, dataset... for distributed training with deepspeed
     model, _, _, _ = deepspeed.initialize(
-        model=model, model_parameters=model.parameters(), optimizer=optimizer, config=ds_config
+        model=model, model_parameters=model.parameters(), config=ds_config
     )
 
 
     # 1 epoch
     start_epoch = time()
     train_sampler.set_epoch(0)
-    model = train_loop(model, train_dataloader, optimizer)
+    model = train_loop(model, train_dataloader)
     print_rank_0(
         f"Duration: {(time() - start_epoch):.3f}s "
     )
