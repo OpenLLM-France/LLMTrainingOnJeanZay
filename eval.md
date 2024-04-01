@@ -69,7 +69,9 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
     - attention: il y a batchsize dans dataloader et dans deepspeed: est-ce OK ?
 - Deepspeed stage 1, gradacc 8, act_chkpting, AdamW, bloom-7b, bs 4, 48xA100:  **66 jours pour 100b tokens**
     - exactement la meme loss que bs=1 mais c'est juste bcp plus lent en throughput (bizarre...): je suppose que c'est du a une mauvaise utilisation des GPUs
-- Deepspeed stage 1, gradacc 4, act_chkpting, AdamW, bloom-7b, bs 1, 48xA100:  **jours pour 100b tokens**
+- Deepspeed stage 1, gradacc 4, act_chkpting, AdamW, bloom-7b, bs 1, 48xA100:  **50 jours pour 100b tokens**
+    - un epsilon meilleur au debut de la loss que DSv2, mais la diff de loss est negligeable et en contrepartie, il perd trop en throughput
+- Deepspeed stage 1, gradacc 8, act_chkpting, AdamW, bloom-7b, bs 1, 64xA100:  **jours pour 100b tokens**
 
 
 ## April loss curves

@@ -79,7 +79,7 @@ def get_ds_config(args):
                     }
                 },
             "wall_clock_breakdown": False,
-            "gradient_accumulation_steps": 4,
+            "gradient_accumulation_steps": 8,
             "train_micro_batch_size_per_gpu": 1,
 
             # "activation_checkpointing": {
