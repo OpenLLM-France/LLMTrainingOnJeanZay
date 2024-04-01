@@ -9,7 +9,7 @@ from transformers import AutoModelForCausalLM, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
 STAGE = 1
-LR = 1e-05
+LR = 1e-04
 
 # TODO:
 # - [X] new model from config with max vocab from megatron tokenizer (32000 tokens)
