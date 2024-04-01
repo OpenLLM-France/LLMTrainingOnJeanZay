@@ -63,6 +63,7 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
     - config: DSv2
 - Deepspeed stage 1, gradacc 16, act_chkpting, AdamW, bloom-7b, bs 1, 48xA100:  **34 jours pour 100b tokens**
     - config: DSv3: cf. courbe ci-dessous pour voir le compromis entre throughput et loss decrease
+- Deepspeed stage 1, gradacc 8, act_chkpting, AdamW, bloom-7b, bs 2, 48xA100:  **jours pour 100b tokens**
 
 ## April loss curves
 
