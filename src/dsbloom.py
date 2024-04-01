@@ -66,9 +66,9 @@ def get_ds_config(args):
                 "type": "AdamW",
                 "params": {
                     "lr": LR,
-                    "betas": "auto",
+                    "betas": [0.9, 0.999],
                     "eps": 1e-08,
-                    "weight_decay": 0.1,
+                    "weight_decay": 0.05,
                     }
                 },
             "scheduler": {
@@ -78,7 +78,6 @@ def get_ds_config(args):
                     "warmup_num_steps": 1000
                     }
                 },
-            "gradient_clipping": "auto",
             "wall_clock_breakdown": False,
             "gradient_accumulation_steps": 8,
             "train_micro_batch_size_per_gpu": 1,
@@ -197,7 +196,7 @@ def main(args):
     # model = AutoModelForCausalLM.from_pretrained(
     #     model_path, torch_dtype=torch.bfloat16
     # )
-    # model.gradient_checkpointing_enable()
+    model.gradient_checkpointing_enable()
 
     # Initialize Optimizer and Criterion
    
