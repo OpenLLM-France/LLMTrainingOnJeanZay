@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=1)
     parser.add_argument('--stage', type=int, default=STAGE)
     parser.add_argument('--lr', type=float, default=LR)
-    parser.add_argument('--batch_size', type=int, default=2)
+    parser.add_argument('--batch_size', type=int, default=4)
     args = parser.parse_args()
     return args
 
@@ -80,7 +80,7 @@ def get_ds_config(args):
                 },
             "wall_clock_breakdown": False,
             "gradient_accumulation_steps": 8,
-            "train_micro_batch_size_per_gpu": 2,
+            "train_micro_batch_size_per_gpu": 4,
 
             # "activation_checkpointing": {
             #     "partition_activations": False,
