@@ -78,11 +78,11 @@ def get_ds_config(args):
                     "warmup_num_steps": 1000
                     }
                 },
-            "gradient_accumulation_steps": "auto",
             "gradient_clipping": "auto",
-            "train_batch_size": "auto",
-            "train_micro_batch_size_per_gpu": "auto",
             "wall_clock_breakdown": False,
+            "gradient_accumulation_steps": 8,
+            "train_micro_batch_size_per_gpu": 1,
+
             # "activation_checkpointing": {
             #     "partition_activations": False,
             #     "cpu_checkpointing": False,
