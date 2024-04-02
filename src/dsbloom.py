@@ -69,7 +69,7 @@ def get_ds_config(args):
                     "max_coeff": 0.3,
                     "min_coeff": 0.01,
                     "freeze_step": 1000,
-                    "cuda_aware": false,
+                    "cuda_aware": False,
                     "comm_backend_name": "nccl",
                     "coeff_beta": 0.9,
                     "factor_max": 4.0,
