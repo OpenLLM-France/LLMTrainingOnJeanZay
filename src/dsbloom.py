@@ -63,14 +63,21 @@ def get_ds_config(args):
                 "output_file": None,
                 },
             "optimizer": {
-                "type": "AdamW",
+                "type": "OneBitLamb",
                 "params": {
                     "lr": LR,
-                    "betas": [0.9, 0.999],
-                    "eps": 1e-08,
-                    "weight_decay": 0.05,
+                    "max_coeff": 0.3,
+                    "min_coeff": 0.01,
+                    "freeze_step": 1000,
+                    "cuda_aware": false,
+                    "comm_backend_name": "nccl",
+                    "coeff_beta": 0.9,
+                    "factor_max": 4.0,
+                    "factor_min": 0.5,
+                    "factor_threshold": 0.1
                     }
                 },
+            "gradient_clipping": 1.0,
             "scheduler": {
                 "type": "WarmupCosineLR",
                 "params": {
