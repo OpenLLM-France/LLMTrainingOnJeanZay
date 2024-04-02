@@ -77,6 +77,8 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
 - Deepspeed stage 1, gradacc 8, act_chkpting, AdamW, bloom-7b, bs 1, 64xA100:  **23 jours pour 100b tokens**
     - LR=1e-4
     - converge au meme point, mais 1e-4 est plus instable au debut 
+- Deepspeed stage 1, gradacc 8, act_chkpting, AdamW, bloom-7b, bs 1, 80xA100:  **21 jours pour 100b tokens**
+    - meme convergence que ci-dessus, mais un peu plus long
 
 
 ## April loss curves
