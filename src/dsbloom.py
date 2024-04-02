@@ -14,10 +14,14 @@ LR = 2e-05
 # TODO:
 # - [X] new model from config with max vocab from megatron tokenizer (32000 tokens)
 # - [X] add LR scheduler (pass to deepspeed config)
-# - [ ] init model weights: A very low standard initialization sqrt(0.3333/NHIDDEN) - in 104B-en used sqrt(0.4/NHIDDEN) see https://github.com/bigscience-workshop/bigscience/blob/master/train/tr11-176B-ml/chronicles.md
-# - [ ] save dataset
+# - [X] init model weights: A very low standard initialization sqrt(0.3333/NHIDDEN) - in 104B-en used sqrt(0.4/NHIDDEN) see https://github.com/bigscience-workshop/bigscience/blob/master/train/tr11-176B-ml/chronicles.md
+# - [ ] save model+opt+scheduler+... checkpoints
 
-# avec DS3 et plus de nodes, le pb de cache-RAM "pytorch allocator cache flushes" n'existe plus, la VRAM est <30GB, je pourrai meme tenter de supprimer le grad checkpointing... ca marche.
+# pending questions:
+# - really should pack data to 2048 ? Does not seem to make a big diff with keeping natural sentences... ?
+# - sample dataset randomly directly from parquet files ? If I pack to 2048, then shuffle, then it'll be hard to progressively increase context length; .parquet are compressed, and must be read sequentially and decompressed; while arrow files are memory map and enable random access in O(1) ! (pyarrow.ipc.open_file())
+# - 1bitLamb could help me remove gradient checkpointing?
+# - continuous training from bloom-7b, with 5%-mag pruning when loss stagne or duplicating 1 layer ?
 
 print("deepspeedversion",deepspeed.__version__)
 
