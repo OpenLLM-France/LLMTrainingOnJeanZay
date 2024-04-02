@@ -72,8 +72,12 @@ Number of compute-days to train on 100b tokens as a function of the number of GP
 - Deepspeed stage 1, gradacc 4, act_chkpting, AdamW, bloom-7b, bs 1, 48xA100:  **50 jours pour 100b tokens**
     - un epsilon meilleur au debut de la loss que DSv2, mais la diff de loss est negligeable et en contrepartie, il perd trop en throughput
 - Deepspeed stage 1, gradacc 8, act_chkpting, AdamW, bloom-7b, bs 1, 64xA100:  **23 jours pour 100b tokens**
-    - config DSv5
+    - config DSv5: LR=1e-5
     - l'utilisation des GPU est bonne, mais un peu moins optimale que DSv2: la lenteur du reseau doit se faire sentir
+- Deepspeed stage 1, gradacc 8, act_chkpting, AdamW, bloom-7b, bs 1, 64xA100:  **23 jours pour 100b tokens**
+    - LR=1e-4
+    - converge au meme point, mais 1e-4 est plus instable au debut 
+
 
 ## April loss curves
 
