@@ -2,7 +2,7 @@
 #SBATCH --job-name=data
 #SBATCH --ntasks-per-node=1
 #SBATCH --nodes=1
-#SBATCH --time=02:00:00
+#SBATCH --time=20:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --account=knb@a100
 #SBATCH --partition=prepost
