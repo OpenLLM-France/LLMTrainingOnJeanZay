@@ -10,10 +10,17 @@ TODO:
 - pas besoin de arrow, python seek() est O(1)
 """
 
-with open("fnoms","r") as f: fnoms = [x.split("\t")[0] for x in f]
-for fnom in fnoms:
+outdir = "alldata/"
+fnoms, tgtnoms=[],[]
+with open("fnoms","r") as f:
+    for l in f:
+        ss = x.split("\t")
+        fnoms.append(ss[0])
+        tgtnoms.append(ss[1])
+for i in range(len(fnoms)):
+    fnom = fnoms[i]
     pf = pq.ParquetFile(fnom)
-    ff = fnom+".txt"
+    ff = outdir+tgtnoms[i]+".txt"
     with open(ff+".idx","wb") as fi:
         with open(ff,"w") as f:
             for data in pf.iter_batches():
