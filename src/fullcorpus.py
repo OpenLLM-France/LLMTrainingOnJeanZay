@@ -14,7 +14,7 @@ outdir = "alldata/"
 fnoms, tgtnoms=[],[]
 with open("fnoms","r") as f:
     for l in f:
-        ss = x.split("\t")
+        ss = l.strip().split("\t")
         fnoms.append(ss[0])
         tgtnoms.append(ss[1])
 for i in range(len(fnoms)):
