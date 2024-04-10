@@ -4,11 +4,13 @@ import pickle
 import time
 
 """
-TODO:
-- save into 200 files (1000 files max) pour que le "seek" soit plus rapide (??)
-  note: sous linux ext4, seek() est en O(1) donc le python seek() est aussi en O(1)
+- note: sous linux ext4, seek() est en O(1) donc le python seek() est aussi en O(1)
   cf https://stackoverflow.com/questions/51801213/complexity-of-f-seek-in-python
 - pas besoin de arrow, python seek() est O(1)
+- 23738037750 lignes
+TODO:
+    - [ ] check la vitesse du python seek()
+    - [ ] tokenizer et compter les tokens
 """
 
 with open("alldata/idx.txt","r") as f:
