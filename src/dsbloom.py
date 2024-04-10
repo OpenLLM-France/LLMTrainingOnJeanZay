@@ -4,8 +4,7 @@ import torch
 import torch.distributed as dist
 from torch.utils.data.distributed import DistributedSampler
 import deepspeed
-import transformers
-from transformers import AutoModelForCausalLM, TrainingArguments
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, TrainingArguments
 import idr_torch  # IDRIS library to make distribution on JZ easier
 
 STAGE = 1
@@ -67,8 +66,11 @@ def get_ds_config(args):
                 "output_file": None,
                 },
             "optimizer": {
-                "type": "FusedLamb",
+                "type": "AdamW",
                 "params": {
+                    "betas": [0.9, 0.999],
+                    "eps": 1e-08,
+                    "weight_decay": 0.05,
                     "lr": LR,
                     }
                 },
@@ -135,11 +137,12 @@ class LucieDataset(torch.utils.data.Dataset):
     def __getitem__(self, i):
         ii = self.idx[i]
         self.f.seek(ii)
-        s=self.f.readLine()
+        s=self.f.readline()
         x=self.toker.batch_encode_plus([s], return_tensors="pt", padding=True)
         return x['input_ids']
  
 def main(args):
+    model_path = os.path.join(args.model_dir, args.model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     # Configure the tokenizer to ensure padding is done right
     if tokenizer.pad_token is None:
@@ -182,7 +185,6 @@ def main(args):
     ds_config = get_ds_config(args)
     # Next line enable smart loading (zero.init()) (necessary for very big models)
     _ = TrainingArguments(output_dir="./", deepspeed=ds_config)
-    model_path = os.path.join(args.model_dir, args.model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_path, torch_dtype=torch.bfloat16
     )
