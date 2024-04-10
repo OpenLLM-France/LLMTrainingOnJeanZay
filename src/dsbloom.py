@@ -115,45 +115,37 @@ def train_loop(model, train_dataloader):
 
     return model
 
-class MegatronDS(torch.utils.data.Dataset):
-    def __init__(self):
-        self.f = None
-        self.reset()
-
-    def readLine(self):
-        s=self.f.readline()
-        ss=s.split(" ")
-        if len(ss)!=2048:
-            print("ERRDATA",len(ss),s)
-            return
-        toks = torch.LongTensor([int(x) for x in ss if len(x.strip())>0])
-        self.buf.append(toks)
-        while len(self.buf)>self.buflen:
-            self.bufdeb += 1
-            del self.buf[0]
-
-    def reset(self):
-        print("reset DS",idr_torch.rank)
-        if self.f != None: self.f.close()
-        self.f = open("shuffled.toks","r")
-        self.buf = []
-        self.bufdeb = 0
-        self.buflen = 100
-        for i in range(self.buflen): self.readLine()
+class LucieDataset(torch.utils.data.Dataset):
+    def __init__(self, toker):
+        self.toker = toker
+        self.f = open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/all.txt")
+        self.fichs=[]
+        self.idx=[]
+        with open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/idx.txt") as f:
+            for l in f:
+                if l.startswith("FFNOM__ "):
+                    ss=l.split(" ")
+                    self.fichs.append(ss[1])
+                    self.idx.append(int(ss[2]))
+        print("NFICHS",len(self.fichs))
 
     def __len__(self):
-        # TODO: generalize it to other data files...
-        return 328389
+        return len(self.fichs)
 
     def __getitem__(self, i):
-        print("getitem",idr_torch.rank,i,self.bufdeb)
-        if i>=self.bufdeb and i<self.bufdeb+self.buflen: return self.buf[i-self.bufdeb]
-        elif i<self.bufdeb: self.reset()
-        while i>=self.bufdeb+self.buflen: self.readLine()
-        return self.buf[i-self.bufdeb]
-
+        ii = self.idx[i]
+        self.f.seek(ii)
+        s=self.f.readLine()
+        x=self.toker.batch_encode_plus([s], return_tensors="pt", padding=True)
+        return x['input_ids']
+ 
 def main(args):
-    dataset = MegatronDS()
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    # Configure the tokenizer to ensure padding is done right
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token_id = 0
+    tokenizer.padding_side = 'left'
+    dataset = LucieDataset(tokenizer)
 
     # Need sampler for Distributed Training
     train_sampler = DistributedSampler(
@@ -190,18 +182,12 @@ def main(args):
     ds_config = get_ds_config(args)
     # Next line enable smart loading (zero.init()) (necessary for very big models)
     _ = TrainingArguments(output_dir="./", deepspeed=ds_config)
-
-    cfg = transformers.models.bloom.BloomConfig.from_pretrained('/gpfswork/rech/knb/uyr14tk/home/openllmfr/bloom7b')
-    model = AutoModelForCausalLM.from_config(cfg)
-
-    # model_path = os.path.join(args.model_dir, args.model_name)
-    # model = AutoModelForCausalLM.from_pretrained(
-    #     model_path, torch_dtype=torch.bfloat16
-    # )
+    model_path = os.path.join(args.model_dir, args.model_name)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path, torch_dtype=torch.bfloat16
+    )
     model.gradient_checkpointing_enable()
 
-    # Initialize Optimizer and Criterion
-   
     # Prepare model, dataset... for distributed training with deepspeed
     model, _, _, _ = deepspeed.initialize(
         model=model, model_parameters=model.parameters(), config=ds_config
