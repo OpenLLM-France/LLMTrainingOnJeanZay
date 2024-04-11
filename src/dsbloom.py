@@ -127,6 +127,7 @@ class LucieDataset(torch.utils.data.Dataset):
         self.f = open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/all.txt")
         self.fichs=[]
         self.idx=[]
+        # TODO: preprocess le corpus !
         with open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/idx.txt") as f:
             for l in f:
                 if l.startswith("FFNOM__ "):
