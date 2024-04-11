@@ -107,6 +107,7 @@ def train_loop(model, train_dataloader):
     for i, data in enumerate(train_dataloader):
         inputs = {'input_ids' : data.to(model.local_rank)}
         xx = inputs['input_ids']
+        print("XX",xx.shape)
         inputs['labels'] = xx.clone()
         out = model(**inputs)
         loss = out.loss
