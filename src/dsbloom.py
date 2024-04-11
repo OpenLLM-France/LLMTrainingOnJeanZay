@@ -102,13 +102,16 @@ def print_rank_0(*args, **kwargs):
     if idr_torch.rank == 0:
         print(*args, **kwargs)
 
-def train_loop(model, train_dataloader):
+def train_loop(model, train_dataloader, toker):
 
-    for i, data in enumerate(train_dataloader):
-        data = data.view(1,-1)
+    for i, utt in enumerate(train_dataloader):
+        print("UTT",model.local_rank,utt)
+        data = toker.batch_encode_plus(utt, return_tensors="pt", padding=True)
+        data = data["input_ids"]
+        data = data.view(1,-1).long()
+        print("XX",data.shape,data.device,model.local_rank)
         inputs = {'input_ids' : data.to(model.local_rank)}
         xx = inputs['input_ids']
-        print("XX",xx.shape)
         inputs['labels'] = xx.clone()
         out = model(**inputs)
         loss = out.loss
@@ -120,8 +123,7 @@ def train_loop(model, train_dataloader):
     return model
 
 class LucieDataset(torch.utils.data.Dataset):
-    def __init__(self, toker):
-        self.toker = toker
+    def __init__(self):
         self.f = open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/all.txt")
         self.fichs=[]
         self.idx=[]
@@ -140,8 +142,7 @@ class LucieDataset(torch.utils.data.Dataset):
         ii = self.idx[i]
         self.f.seek(ii)
         s=self.f.readline()
-        x=self.toker.batch_encode_plus([s], return_tensors="pt", padding=True)
-        return x['input_ids']
+        return s.strip()
  
 def main(args):
     model_path = os.path.join(args.model_dir, args.model_name)
@@ -150,12 +151,12 @@ def main(args):
     if tokenizer.pad_token is None:
         tokenizer.pad_token_id = 0
     tokenizer.padding_side = 'left'
-    dataset = LucieDataset(tokenizer)
+    dataset = LucieDataset()
 
     # Need sampler for Distributed Training
     train_sampler = DistributedSampler(
         dataset,
-        shuffle=False,
+        shuffle=True,
         num_replicas=idr_torch.world_size,
         rank=idr_torch.rank
     )
@@ -201,7 +202,7 @@ def main(args):
     # 1 epoch
     start_epoch = time()
     train_sampler.set_epoch(0)
-    model = train_loop(model, train_dataloader)
+    model = train_loop(model, train_dataloader, tokenizer)
     print_rank_0(
         f"Duration: {(time() - start_epoch):.3f}s "
     )
