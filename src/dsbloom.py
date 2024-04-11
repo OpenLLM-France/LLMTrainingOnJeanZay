@@ -105,6 +105,7 @@ def print_rank_0(*args, **kwargs):
 def train_loop(model, train_dataloader):
 
     for i, data in enumerate(train_dataloader):
+        data = data.view(1,-1)
         inputs = {'input_ids' : data.to(model.local_rank)}
         xx = inputs['input_ids']
         print("XX",xx.shape)
