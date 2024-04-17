@@ -102,13 +102,11 @@ def print_rank_0(*args, **kwargs):
     if idr_torch.rank == 0:
         print(*args, **kwargs)
 
-def train_loop(model, train_dataloader, toker):
+def train_loop(model, train_dataloader):
 
     for i, utt in enumerate(train_dataloader):
-        print("UTT",model.local_rank,utt)
-        data = toker.batch_encode_plus(utt, return_tensors="pt", padding=True)
-        data = data["input_ids"]
-        data = data.view(1,-1).long()
+        print("UTT",model.local_rank,i)
+        data = torch.LongTensor(utt).view(1,-1)
         print("XX",data.shape,data.device,model.local_rank)
         inputs = {'input_ids' : data.to(model.local_rank)}
         xx = inputs['input_ids']
@@ -124,17 +122,15 @@ def train_loop(model, train_dataloader, toker):
 
 class LucieDataset(torch.utils.data.Dataset):
     def __init__(self):
-        self.f = open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/all.txt")
-        self.fichs=[]
+        self.f = open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/all.pkl","rb")
         self.idx=[]
-        # TODO: preprocess le corpus !
-        with open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/idx.txt") as f:
-            for l in f:
-                if l.startswith("FFNOM__ "):
-                    ss=l.split(" ")
-                    self.fichs.append(ss[1])
-                    self.idx.append(int(ss[2]))
-        print("NFICHS",len(self.fichs))
+        with open("/gpfswork/rech/knb/uyr14tk/home/openllmfr/alldata/all.idx","rb") as f:
+            try:
+                while True:
+                    idx = pickle.load(f)
+                    self.idx.append(idx)
+            except: pass
+        print("NFICHS",len(self.idx))
 
     def __len__(self):
         return len(self.fichs)
@@ -142,8 +138,8 @@ class LucieDataset(torch.utils.data.Dataset):
     def __getitem__(self, i):
         ii = self.idx[i]
         self.f.seek(ii)
-        s=self.f.readline()
-        return s.strip()
+        x = pickle.load(self.f)
+        return x
  
 def main(args):
     model_path = os.path.join(args.model_dir, args.model_name)
