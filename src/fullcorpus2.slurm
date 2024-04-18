@@ -15,5 +15,6 @@ module load pytorch-gpu/py3/2.2.0
 echo "DATEDEBUT"
 date
 
+export TOKENIZERS_PARALLELISM=1
 srun python fullcorpus2.py
 

@@ -3,6 +3,16 @@ import os
 import time
 import pickle
 from transformers import AutoTokenizer
+from datasets import load_dataset
+
+"""
+data_files = {'train': 'alldata/all.txt'}
+dataset = load_dataset('text', data_files=data_files, split='train', streaming=True)
+def encode(examples):
+    return tokenizer(examples['text'], truncation=True, padding='max_length')
+dataset = dataset.map(encode, batched=True, remove_columns=["text", "timestamp", "url"])
+"""
+
 
 """
 - 2nd step: now that all texts are in a single indexed file, we can tokenize it all
