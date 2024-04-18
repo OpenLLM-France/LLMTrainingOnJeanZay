@@ -10,9 +10,11 @@ from transformers import AutoTokenizer
 """
 
 tokenizer = AutoTokenizer.from_pretrained("/gpfsdswork/dataset/HuggingFace_Models/bigscience/bloom-7b1")
+print("ISFAST",tokenizer.is_fast)
 if tokenizer.pad_token is None: tokenizer.pad_token_id = 0
 tokenizer.padding_side = 'left'
 
+# TODO: speedup by tokenizing utts in parallel
 
 with open("alldata/all.pkl","wb") as g:
     with open("alldata/all.idx","wb") as gidx:
