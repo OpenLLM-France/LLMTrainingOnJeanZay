@@ -19,15 +19,17 @@ tokenizer.padding_side = 'left'
 with open("alldata/all.pkl","wb") as g:
     with open("alldata/all.idx","wb") as gidx:
         with open("alldata/all.txt","r") as f:
+            lines = []
             cur = []
             for i,l in enumerate(f):
                 print("line",i)
-                toks = tokenizer.encode(l)
-                # already concat to 2048 + index
-                cur.append(toks)
-                if len(cur)>=2048:
-                    toks = cur[2048:]
-                    cur = cur[:2048]
-                    pickle.dump(g.tell(),gidx)
-                    pickle.dump(cur,g)
-                    cur = toks
+                lines.append(l)
+                if len(lines)>10:
+                    ltoks = tokenizer(lines, return_tensors=None)
+                    # already concat to 2048 + index
+                    for toks in ltoks: cur.append(toks)
+                    while len(cur)>=2048:
+                        pickle.dump(g.tell(),gidx)
+                        pickle.dump(cur[:2048],g)
+                        cur = cur[2048:]
+                    lines = []
