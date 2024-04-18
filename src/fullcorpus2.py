@@ -22,14 +22,16 @@ with open("alldata/all.pkl","wb") as g:
             lines = []
             cur = []
             for i,l in enumerate(f):
-                print("line",i)
                 lines.append(l)
                 if len(lines)>10:
                     ltoks = tokenizer(lines, return_tensors=None)
                     # already concat to 2048 + index
-                    for toks in ltoks: cur.append(toks)
+                    for toks in ltoks['input_ids']: cur.append(toks)
                     while len(cur)>=2048:
                         pickle.dump(g.tell(),gidx)
                         pickle.dump(cur[:2048],g)
                         cur = cur[2048:]
+                    print("l",i,len(ltoks['input_ids']),' '.join([str(len(x)) for x in ltoks['input_ids']]))
+                    gidx.flush()
+                    g.flush()
                     lines = []
