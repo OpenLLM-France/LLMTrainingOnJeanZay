@@ -6,6 +6,8 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 
 """
+# peut-etre utiliser la classe Dataset pour tokeniser en multithread ? cf. ci-dessous
+
 data_files = {'train': 'alldata/all.txt'}
 dataset = load_dataset('text', data_files=data_files, split='train', streaming=True)
 def encode(examples):
@@ -16,7 +18,9 @@ dataset = dataset.map(encode, batched=True, remove_columns=["text", "timestamp",
 
 """
 - 2nd step: now that all texts are in a single indexed file, we can tokenize it all
-- sur prepost: process 430720000 lignes en 12h == 2% du total ! Donc il faut 50x12 = 600h == 25 jours
+- sur prepost: process 430720000 lignes en 12h == 2% du total 23738037750 ! Donc il faut 50x12 = 600h == 25 jours
+- avec des "batch" de 1000 pour le tokenizer: 982439457 en 10h30 ==> 4% du total, donc il faut 11 jours
+- autre option: revenir a une tokenization pendant le train et simplement indexer ici les lignes
 """
 
 tokenizer = AutoTokenizer.from_pretrained("/gpfsdswork/dataset/HuggingFace_Models/bigscience/bloom-7b1")
