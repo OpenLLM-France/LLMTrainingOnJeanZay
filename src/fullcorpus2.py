@@ -60,7 +60,7 @@ with open("alldata/all.pkl","wb") as g:
                     # millions of tokens per hour
                     # la majorite du temps est pris par le tokenizer: 760s vs. 21s pour le save pour un total de 840s
                     # PB1: trop lent: 61Mtoks/h alors que HF tokenizers fast run a 50Mtoks/s
-                    # PB2: la vitesse decroit lentement
+                    # PB2: la vitesse decroit lentement ==> en fait non, cela depend des data !
                     print("l",i,mtokperh,ttok,tsav,len(ltoks['input_ids']))
                     gidx.flush()
                     g.flush()
